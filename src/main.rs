@@ -9,6 +9,7 @@ static NEWLINE : u8 = 10;
 
 fn output(text: &Vec<u8>, position: isize, pattern_length: isize) {
   let mut start: isize = position;
+
   while start > 0 {
     if text[start as usize] == NEWLINE {
       start += 1;
@@ -16,6 +17,7 @@ fn output(text: &Vec<u8>, position: isize, pattern_length: isize) {
     }
     start -= 1;
   }
+
   let mut end: isize = position + pattern_length;
   while end <= text.len() as isize {
     if text[end as usize] == NEWLINE {
@@ -26,6 +28,7 @@ fn output(text: &Vec<u8>, position: isize, pattern_length: isize) {
   if end - start > 200 {
     end = start + pattern_length as isize;
   }
+
   let mut _string: Vec<u8> = Vec::new();
   for a in start..end {
     _string.push(text[a as usize]);
@@ -34,7 +37,17 @@ fn output(text: &Vec<u8>, position: isize, pattern_length: isize) {
     Ok(v) => v,
     Err(e) => panic!("Invalid utf8 {}", e),
   };
-  println!("{:.*}:{:?}", 2, position, s);
+
+  // get number of previous newlines
+  let mut index = position - 1;
+  let mut number_of_newlines = 1;
+  while index >= 0 {
+    if text[index as usize] == NEWLINE {
+      number_of_newlines += 1;
+    }
+    index -= 1;
+  }
+  println!("{:.*}:{:?}", 2, number_of_newlines, s);
   // process::exit(0);
 }
 
@@ -51,6 +64,7 @@ fn horspool_search (pattern: &String, text: &Vec<u8>, occ: &Vec<isize>) {
     let pattern = pattern.as_bytes();
     let pattern_length = pattern.len() as isize;
 
+    // let newline_cache: Vec<usize> = Vec::new();
     while i < text.len() as isize - pattern_length {
       j = pattern_length - 1;
       while j >= 0 && pattern[j as usize] == text[(i+j) as usize] {
