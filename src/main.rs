@@ -6,6 +6,8 @@ use std::env;
 
 static ALPHABETSIZE : i32 = 256;
 static NEWLINE : u8 = 10;
+// static COLOR_LINE_NUMBER : String = "\033[1;33m"; /* bold yellow */
+// static COLOR_RESET : String = "\033[0m\033[K";
 
 fn output(text: &Vec<u8>, position: isize, pattern_length: isize) {
   let mut start: isize = position;
@@ -48,6 +50,8 @@ fn output(text: &Vec<u8>, position: isize, pattern_length: isize) {
     index -= 1;
   }
   println!("{:.*}:{:?}", 2, number_of_newlines, s);
+  // fprintf(out_fd, "%s%lu%s%c", opts.color_line_number, (unsigned long)count, color_reset, sep);
+  // println!("{}{:.*}{}:{:?}", COLOR_LINE_NUMBER, 2, number_of_newlines, COLOR_RESET, s);
   // process::exit(0);
 }
 
