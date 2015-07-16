@@ -107,6 +107,15 @@ fn horspool_init_occ(pattern: &String) -> Vec<isize> {
 }
 
 fn read_dir (path: &Path, query: &String) {
+  let metadata = std::fs::metadata(path).unwrap();
+  if metadata.is_file() {
+    handle_path(path, query);
+    return;
+  }
+  if !metadata.is_dir() {
+    return;
+  }
+
   for entry in fs::read_dir(path).unwrap() {
     let direntry = entry.unwrap();
 
