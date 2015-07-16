@@ -4,3 +4,4 @@ version = "0.1.0"
 authors = ["Matt Kaniaris <mkaniaris@gmail.com>"]
 [dependencies]
 getopts = "0.2"
+ansi_term = "*"

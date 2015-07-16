@@ -3,6 +3,14 @@ use std::io::prelude::*;
 use std::io;
 use std::process;
 use std::env;
+use std::fs;
+use std::path::Path;
+use std::path::PathBuf;
+
+extern crate ansi_term;
+use ansi_term::Colour::{Red};
+// use ansi_term::Colour::{Black, Red, Green, Yellow, Blue, Purple, Cyan, Fixed};
+// use ansi_term::Style;
 
 static ALPHABETSIZE : i32 = 256;
 static NEWLINE : u8 = 10;
@@ -49,7 +57,10 @@ fn output(text: &Vec<u8>, position: isize, pattern_length: isize) {
     }
     index -= 1;
   }
-  println!("{:.*}:{:?}", 2, number_of_newlines, s);
+  let number_string : String = number_of_newlines.to_string();
+  let ansi_string = Red.paint(&number_string);
+  println!("{:.*}:{:?}", 3, ansi_string.to_string(), s);
+
   // fprintf(out_fd, "%s%lu%s%c", opts.color_line_number, (unsigned long)count, color_reset, sep);
   // println!("{}{:.*}{}:{:?}", COLOR_LINE_NUMBER, 2, number_of_newlines, COLOR_RESET, s);
   // process::exit(0);
@@ -95,6 +106,37 @@ fn horspool_init_occ(pattern: &String) -> Vec<isize> {
   vec
 }
 
+fn read_dir (path: &Path, query: &String) {
+  for entry in fs::read_dir(path).unwrap() {
+    let direntry = entry.unwrap();
+
+    let path_buf : PathBuf = direntry.path();
+    let fucking_path : &Path = path_buf.as_path();
+    let metadata = std::fs::metadata(fucking_path).unwrap();
+
+    if metadata.is_file() {
+      handle_path(fucking_path, query);
+      continue;
+    }
+    if !metadata.is_dir() {
+      continue;
+    }
+    read_dir(fucking_path, query);
+  }
+}
+
+fn handle_path (path: &std::path::Path, query: &String) {
+  let mut buf: Vec<u8> = Vec::new();
+  let string : String = match path.to_str()  {
+    None => process::exit(0),
+    Some(s) => format!("{}", s),
+  };
+
+  read_file(&string, &mut buf).ok().expect("could not read the file");
+  let occ = horspool_init_occ(&query);
+  horspool_search(&query, &buf, &occ);
+}
+
 fn main() {
   let args: Vec<String> = env::args().collect();
 
@@ -103,11 +145,7 @@ fn main() {
   }
 
   let query = args[1].clone();
-  let path = args[2].clone();
-  let mut buf: Vec<u8> = Vec::new();
-
-  read_file(&path, &mut buf).ok().expect("could not read the file");
-  let occ = horspool_init_occ(&query);
-  horspool_search(&query, &buf, &occ);
-  // println!("{}", buf);
+  let path : String = args[2].clone();
+  let path = std::path::Path::new(&path);
+  read_dir(path, &query);
 }
