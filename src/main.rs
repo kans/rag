@@ -8,14 +8,13 @@ use std::path::Path;
 use std::path::PathBuf;
 
 extern crate ansi_term;
-use ansi_term::Colour::{Red};
+use ansi_term::Colour::{Fixed, Green};
+// static COLOR_LINE_NUMBER : String = "\033[1;33m"; /* bold yellow */
 // use ansi_term::Colour::{Black, Red, Green, Yellow, Blue, Purple, Cyan, Fixed};
 // use ansi_term::Style;
 
 static ALPHABETSIZE : i32 = 256;
 static NEWLINE : u8 = 10;
-// static COLOR_LINE_NUMBER : String = "\033[1;33m"; /* bold yellow */
-// static COLOR_RESET : String = "\033[0m\033[K";
 
 fn output(text: &Vec<u8>, position: isize, pattern_length: isize) {
   let mut start: isize = position;
@@ -58,12 +57,7 @@ fn output(text: &Vec<u8>, position: isize, pattern_length: isize) {
     index -= 1;
   }
   let number_string : String = number_of_newlines.to_string();
-  let ansi_string = Red.paint(&number_string);
-  println!("{:.*}:{:?}", 3, ansi_string.to_string(), s);
-
-  // fprintf(out_fd, "%s%lu%s%c", opts.color_line_number, (unsigned long)count, color_reset, sep);
-  // println!("{}{:.*}{}:{:?}", COLOR_LINE_NUMBER, 2, number_of_newlines, COLOR_RESET, s);
-  // process::exit(0);
+  println!("{:.*}:{:?}", 3, Fixed(33).paint(&number_string), s);
 }
 
 fn read_file(path: &String, buf: &mut Vec<u8>) -> io::Result<()> {
@@ -106,10 +100,10 @@ fn horspool_init_occ(pattern: &String) -> Vec<isize> {
   vec
 }
 
-fn read_dir (path: &Path, query: &String) {
+fn read_dir (path: &Path, query: &String, print_file: bool) {
   let metadata = std::fs::metadata(path).unwrap();
   if metadata.is_file() {
-    handle_path(path, query);
+    handle_path(path, query, print_file);
     return;
   }
   if !metadata.is_dir() {
@@ -124,17 +118,17 @@ fn read_dir (path: &Path, query: &String) {
     let metadata = std::fs::metadata(fucking_path).unwrap();
 
     if metadata.is_file() {
-      handle_path(fucking_path, query);
+      handle_path(fucking_path, query, true);
       continue;
     }
     if !metadata.is_dir() {
       continue;
     }
-    read_dir(fucking_path, query);
+    read_dir(fucking_path, query, true);
   }
 }
 
-fn handle_path (path: &std::path::Path, query: &String) {
+fn handle_path (path: &std::path::Path, query: &String, print_file: bool) {
   let mut buf: Vec<u8> = Vec::new();
   let string : String = match path.to_str()  {
     None => process::exit(0),
@@ -143,6 +137,10 @@ fn handle_path (path: &std::path::Path, query: &String) {
 
   read_file(&string, &mut buf).ok().expect("could not read the file");
   let occ = horspool_init_occ(&query);
+  if print_file {
+    let p = format!("{:?}", path.display());
+    println!("{}", Green.paint(&p));
+  }
   horspool_search(&query, &buf, &occ);
 }
 
@@ -156,5 +154,5 @@ fn main() {
   let query = args[1].clone();
   let path : String = args[2].clone();
   let path = std::path::Path::new(&path);
-  read_dir(path, &query);
+  read_dir(path, &query, false);
 }
