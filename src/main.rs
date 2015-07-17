@@ -44,7 +44,7 @@ fn output(text: &Vec<u8>, position: isize, pattern_length: isize) {
   }
   let s = match std::str::from_utf8(&_string) {
     Ok(v) => v,
-    Err(e) => panic!("Invalid utf8 {}", e),
+    Err(_) => return,
   };
 
   // get number of previous newlines
@@ -68,7 +68,7 @@ fn read_file(path: &String, buf: &mut Vec<u8>) -> io::Result<()> {
 
 fn horspool_init_occ(pattern: &String) -> Vec<isize> {
   let mut vec: Vec<isize> = Vec::with_capacity(256);
-  for _ in 0..(ALPHABETSIZE-1) {
+  for _ in 0..(ALPHABETSIZE) {
     vec.push(-1);
   }
 
