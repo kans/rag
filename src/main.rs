@@ -66,27 +66,6 @@ fn read_file(path: &String, buf: &mut Vec<u8>) -> io::Result<()> {
   Ok(())
 }
 
-fn horspool_search (pattern: &String, text: &Vec<u8>, occ: &Vec<isize>) {
-    let mut i: isize = 0;
-    let mut j: isize;
-
-    let pattern = pattern.as_bytes();
-    let pattern_length = pattern.len() as isize;
-
-    // let newline_cache: Vec<usize> = Vec::new();
-    while i < text.len() as isize - pattern_length {
-      j = pattern_length - 1;
-      while j >= 0 && pattern[j as usize] == text[(i+j) as usize] {
-        j -= 1;
-      }
-      if j < 0 {
-        output(text, i, pattern_length);
-      }
-      i += pattern_length;
-      i -= occ[text[i as usize] as usize];
-  }
-}
-
 fn horspool_init_occ(pattern: &String) -> Vec<isize> {
   let mut vec: Vec<isize> = Vec::with_capacity(256);
   for _ in 0..(ALPHABETSIZE-1) {
@@ -128,7 +107,7 @@ fn read_dir (path: &Path, query: &String, print_file: bool) {
   }
 }
 
-fn handle_path (path: &std::path::Path, query: &String, print_file: bool) {
+fn handle_path (path: &std::path::Path, query: &String, should_print_file: bool) {
   let mut buf: Vec<u8> = Vec::new();
   let string : String = match path.to_str()  {
     None => process::exit(0),
@@ -137,11 +116,29 @@ fn handle_path (path: &std::path::Path, query: &String, print_file: bool) {
 
   read_file(&string, &mut buf).ok().expect("could not read the file");
   let occ = horspool_init_occ(&query);
-  if print_file {
-    let p = format!("{:?}", path.display());
-    println!("{}", Green.paint(&p));
+  let mut i: isize = 0;
+  let mut j: isize;
+  let mut printed_file = false;
+  let pattern = query.as_bytes();
+  let pattern_length = pattern.len() as isize;
+
+  // let newline_cache: Vec<usize> = Vec::new();
+  while i < buf.len() as isize - pattern_length {
+    j = pattern_length - 1;
+    while j >= 0 && pattern[j as usize] == buf[(i+j) as usize] {
+      j -= 1;
+    }
+    if j < 0 {
+      if should_print_file && !printed_file {
+        printed_file = true;
+        let p = format!("{:?}", path.display());
+        println!("{}", Green.paint(&p));
+      }
+      output(&buf, i, pattern_length);
+    }
+    i += pattern_length;
+    i -= occ[buf[i as usize] as usize];
   }
-  horspool_search(&query, &buf, &occ);
 }
 
 fn main() {
