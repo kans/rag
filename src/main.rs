@@ -208,6 +208,7 @@ fn main() {
 
   if args.len() != 3 {
     println!("I require 2 arguments");
+    std::process::exit(1);
   }
 
   let query = args[1].clone();
