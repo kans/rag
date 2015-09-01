@@ -2,8 +2,10 @@ use std;
 use std::process;
 use std::io;
 use std::io::prelude::*;
+use std::fs;
 use std::fs::File;
 use std::path::Path;
+use std::path::PathBuf;
 
 use utils;
 use output;
@@ -12,7 +14,7 @@ use output;
 use ansi_term::Colour::{Green};
 static ALPHABETSIZE : i32 = 256;
 
-pub fn horspool_init_occ(pattern: &String) -> Vec<isize> {
+fn horspool_init_occ(pattern: &String) -> Vec<isize> {
   let mut vec: Vec<isize> = Vec::with_capacity(256);
   for _ in 0..(ALPHABETSIZE) {
     vec.push(-1);
@@ -32,7 +34,7 @@ fn read_file(path: &String, buf: &mut Vec<u8>) -> io::Result<()> {
   Ok(())
 }
 
-pub fn handle_path (path: &std::path::Path, query: &String, should_print_file: bool) {
+fn search_file (path: &std::path::Path, query: &String, should_print_file: bool) {
   let mut buf: Vec<u8> = Vec::new();
   let string : String = match path.to_str()  {
     None => process::exit(0),
@@ -67,4 +69,37 @@ pub fn handle_path (path: &std::path::Path, query: &String, should_print_file: b
     i += pattern_length;
     i -= occ[buf[i as usize] as usize];
   }
+}
+
+pub fn search_dir (path: &Path, query: &String) {
+  for entry in fs::read_dir(path).unwrap() {
+    let direntry = entry.unwrap();
+
+    let path_buf : PathBuf = direntry.path();
+    let fucking_path : &Path = path_buf.as_path();
+    let metadata = std::fs::metadata(fucking_path).unwrap();
+
+    if metadata.is_file() {
+      search_file(fucking_path, query, true);
+      continue;
+    }
+    if !metadata.is_dir() {
+      continue;
+    }
+    search_dir(fucking_path, query);
+  }
+}
+
+pub fn search (path: &Path, query: &String, print_file: bool) {
+  let metadata = std::fs::metadata(path).unwrap();
+
+  if metadata.is_file() {
+    search_file(path, query, print_file);
+    return;
+  }
+  if !metadata.is_dir() {
+    return;
+  }
+
+  search_dir (path, query);
 }
