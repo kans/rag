@@ -1,6 +1,6 @@
 use std;
 
-use ansi_term::Colour::{Fixed, Green};
+use ansi_term::Colour::{Fixed};
 
 static NEWLINE : u8 = 10;
 pub fn output(text: &Vec<u8>, position: isize, pattern_length: isize) {

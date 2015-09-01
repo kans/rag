@@ -1,18 +1,15 @@
 use std;
 use std::process;
-use std::env;
-use std::fs;
 use std::io;
 use std::io::prelude::*;
 use std::fs::File;
 use std::path::Path;
-use std::path::PathBuf;
 
 use utils;
 use output;
 // use self::output;
 // use self::utils;
-use ansi_term::Colour::{Fixed, Green};
+use ansi_term::Colour::{Green};
 static ALPHABETSIZE : i32 = 256;
 
 pub fn horspool_init_occ(pattern: &String) -> Vec<isize> {
