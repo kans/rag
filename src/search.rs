@@ -93,29 +93,41 @@ impl <'a> Search <'a> {
   }
 
  fn search_dir (&self, path: &Path) {
-    match fs::read_dir(path) {
+    let entries = match fs::read_dir(path) {
       Err(oh_shit) => {
         writeln!(&mut io::stderr(), "{}", oh_shit).unwrap();
         return;
-      }
-      Ok(entries) => {
-        for entry in entries {
-          let direntry = entry.unwrap();
+      },
+      Ok(entries) => entries
+    };
 
-          let path_buf : PathBuf = direntry.path();
-          let fucking_path : &Path = path_buf.as_path();
-          let metadata = std::fs::metadata(fucking_path).unwrap();
+    for entry in entries {
+      let direntry = match entry {
+        Err(oh_shit) => {
+          writeln!(&mut io::stderr(), "{}", oh_shit).unwrap();
+          continue;
+        },
+        Ok(entry) => entry,
+      };
 
-          if metadata.is_file() {
-            self.search_file(fucking_path, true);
-            continue;
-          }
-          if !metadata.is_dir() {
-            continue;
-          }
-          self.search_dir(fucking_path);
-        }
+      let path_buf : PathBuf = direntry.path();
+      let fucking_path : &Path = path_buf.as_path();
+      let metadata = match std::fs::metadata(fucking_path) {
+        Err(oh_shit) => {
+          writeln!(&mut io::stderr(), "{}", oh_shit).unwrap();
+          continue;
+        },
+        Ok(metadata) => metadata,
+      };
+
+      if metadata.is_file() {
+        self.search_file(fucking_path, true);
+        continue;
       }
+      if !metadata.is_dir() {
+        continue;
+      }
+      self.search_dir(fucking_path);
     }
   }
 }
