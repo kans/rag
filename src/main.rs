@@ -19,5 +19,6 @@ fn main() {
   let query = args[1].clone();
   let path : String = args[2].clone();
   let path = std::path::Path::new(&path);
-  search::search(path, &query, false);
+  let s = search::Search::new(&query);
+  s.search(path, false);
 }
