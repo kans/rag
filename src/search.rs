@@ -26,7 +26,7 @@ impl <'a> Search <'a> {
 
     let mut occ: Vec<isize> = Vec::with_capacity(ALPHABETSIZE as usize);
 
-    for _ in 0..(ALPHABETSIZE) {
+    for _ in 0..ALPHABETSIZE {
       occ.push(-1);
     }
 
@@ -45,18 +45,22 @@ impl <'a> Search <'a> {
   }
 
   pub fn search (&self, path: &Path, print_file: bool) {
-    let metadata = std::fs::metadata(path).unwrap();
+    let metadata = match std::fs::metadata(path) {
+      Err(oh_shit) => {
+        output::stderr(oh_shit);
+        return;
+      },
+      Ok(metadata) => metadata,
+    };
 
     if metadata.is_file() {
       self.search_file(path, print_file);
       return;
     }
 
-    if !metadata.is_dir() {
-      return;
+    if metadata.is_dir() {
+      self.search_dir(path);
     }
-
-    self.search_dir(path);
   }
 
   fn read_file(&self, path: &String, buf: &mut Vec<u8>) -> io::Result<()> {
@@ -67,7 +71,7 @@ impl <'a> Search <'a> {
 
   fn search_file (&self, path: &std::path::Path, should_print_file: bool) {
     let mut buf: Vec<u8> = Vec::new();
-    let string : String = match path.to_str()  {
+    let string : String = match path.to_str() {
       None => process::exit(0),
       Some(s) => format!("{}", s),
     };
