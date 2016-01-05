@@ -17,21 +17,29 @@ static ALPHABETSIZE : i32 = 256;
 pub struct Search<'a> {
   occ: Vec<isize>,
   query: &'a String,
+  query_length: isize,
+  query_bytes: &'a[u8],
 }
 
 impl <'a> Search <'a> {
-  pub fn new (query: &'a String) -> Search <'a> {
+  pub fn new (query: &'a String) -> Search {
+
     let mut occ: Vec<isize> = Vec::with_capacity(ALPHABETSIZE as usize);
+
     for _ in 0..(ALPHABETSIZE) {
       occ.push(-1);
     }
 
-    for (i, a) in query.as_bytes().iter().enumerate() {
+    let bytes = query.as_bytes();
+
+    for (i, a) in bytes.iter().enumerate() {
       occ[*a as usize] = i as isize;
     }
 
     Search {
       query: query,
+      query_bytes: &bytes,
+      query_length: bytes.len() as isize,
       occ: occ
     }
   }
@@ -43,6 +51,7 @@ impl <'a> Search <'a> {
       self.search_file(path, print_file);
       return;
     }
+
     if !metadata.is_dir() {
       return;
     }
@@ -67,15 +76,13 @@ impl <'a> Search <'a> {
     let mut i: isize = 0;
     let mut j: isize;
     let mut printed_file = false;
-    let pattern = self.query.as_bytes();
-    let pattern_length = pattern.len() as isize;
+    let pattern = self.query_bytes;
     let buf_len = buf.len();
     if utils::is_binary(&buf, buf_len) {
       return;
     }
-    // let newline_cache: Vec<usize> = Vec::new();
-    while i < buf_len as isize - pattern_length {
-      j = pattern_length - 1;
+    while i < buf_len as isize - self.query_length {
+      j = self.query_length - 1;
       while j >= 0 && pattern[j as usize] == buf[(i+j) as usize] {
         j -= 1;
       }
@@ -85,9 +92,9 @@ impl <'a> Search <'a> {
           let p = format!("{:?}", path.display());
           println!("{}", Green.paint(&p));
         }
-        output::output(&buf, i, pattern_length);
+        output::print_matches(&buf, i, self.query_length);
       }
-      i += pattern_length;
+      i += self.query_length;
       i -= self.occ[buf[i as usize] as usize];
     }
   }
@@ -95,7 +102,7 @@ impl <'a> Search <'a> {
  fn search_dir (&self, path: &Path) {
     let entries = match fs::read_dir(path) {
       Err(oh_shit) => {
-        writeln!(&mut io::stderr(), "{}", oh_shit).unwrap();
+        output::stderr(oh_shit);
         return;
       },
       Ok(entries) => entries
@@ -104,7 +111,7 @@ impl <'a> Search <'a> {
     for entry in entries {
       let direntry = match entry {
         Err(oh_shit) => {
-          writeln!(&mut io::stderr(), "{}", oh_shit).unwrap();
+          output::stderr(oh_shit);
           continue;
         },
         Ok(entry) => entry,
@@ -114,7 +121,7 @@ impl <'a> Search <'a> {
       let fucking_path : &Path = path_buf.as_path();
       let metadata = match std::fs::metadata(fucking_path) {
         Err(oh_shit) => {
-          writeln!(&mut io::stderr(), "{}", oh_shit).unwrap();
+          output::stderr(oh_shit);
           continue;
         },
         Ok(metadata) => metadata,

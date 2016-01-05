@@ -1,9 +1,12 @@
 use std;
+use std::io;
+use std::io::prelude::*;
 
 use ansi_term::Colour::{Fixed};
 
 static NEWLINE : u8 = 10;
-pub fn output(text: &Vec<u8>, position: isize, pattern_length: isize) {
+
+pub fn print_matches(text: &Vec<u8>, position: isize, pattern_length: isize) {
   let mut start: isize = position;
 
   while start > 0 {
@@ -47,3 +50,6 @@ pub fn output(text: &Vec<u8>, position: isize, pattern_length: isize) {
   println!("{:.*}:{:?}", 3, Fixed(33).paint(&number_string), s);
 }
 
+pub fn stderr(err: std::io::Error) {
+  writeln!(&mut io::stderr(), "{}", err).unwrap();
+}
