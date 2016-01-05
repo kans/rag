@@ -1,6 +1,8 @@
+static PDF_HEADER: [u8;5] = [0x25,0x50,0x44,0x46,0x2d];
 
 /* This function is very hot. It's called on every file. */
 pub fn is_binary(buf: &Vec<u8>, buf_len: usize) -> bool {
+  // TODO: make unsafe!
   if buf_len == 0 {
     return true;
   }
@@ -10,7 +12,7 @@ pub fn is_binary(buf: &Vec<u8>, buf_len: usize) -> bool {
     return false;
   }
 
-  if buf_len >= 4 && buf[0] == 0x25 && buf[1] == 0x50 && buf[2] == 0x44 && buf[3] == 0x46 && buf[4] == 0x2d {
+  if buf_len > 4 && &buf[0..5] == &PDF_HEADER {
     /* PDF. This is binary. */
     return true;
   }
