@@ -10,10 +10,10 @@ pub fn is_binary(buf: &Vec<u8>, buf_len: usize) -> bool {
     return false;
   }
 
-  // if (buf_len >= 4 && strncmp(buf, "%PDF-", 5) == 0) {
-  //     /* PDF. This is binary. */
-  //     return 1;
-  // }
+  if buf_len >= 4 && buf[0] == 0x25 && buf[1] == 0x50 && buf[2] == 0x44 && buf[3] == 0x46 && buf[4] == 0x2d {
+    /* PDF. This is binary. */
+    return true;
+  }
   let mut suspicious_bytes: usize = 0;
   let mut total_bytes: usize = buf.len();
   if total_bytes > 512 {
