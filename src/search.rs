@@ -103,7 +103,7 @@ impl <'a> Search <'a> {
           let p = format!("{:?}", path.display());
           println!("\n{}", Green.paint(&p));
         }
-        output::print_matches(&buf, i, self.query_length);
+        output::print_matches(&buf, i, self.query_length, self.query);
       }
       i += self.query_length;
       i -= self.occ[buf[i as usize] as usize];
