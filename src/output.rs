@@ -2,7 +2,6 @@ use std;
 use std::io;
 use std::io::prelude::*;
 
-use ansi_term::Style;
 use ansi_term::Colour::{Black, Yellow, Fixed};
 
 static NEWLINE : u8 = 10;
@@ -47,20 +46,11 @@ pub fn print_matches(text: &Vec<u8>, position: isize, pattern_length: isize, que
     }
     index -= 1;
   }
-  let line_number : String = number_of_newlines.to_string();
+  let vec : Vec<&str> = s.split(query).collect();
+  let joiner = Black.bold().on(Yellow).paint(query).to_string();
+  let line = vec.join(&joiner);
 
-  let index = s.find(query);
-
-  if let Some(position) = index {
-    let line = unsafe {
-      let p: usize = position + pattern_length as usize;
-      let postfix =  s.slice_unchecked(p, s.len());
-      let prefix =   s.slice_unchecked(0, position);
-
-      format!("{}{}{}", prefix, Black.bold().on(Yellow).paint(query), postfix)
-    };
-    println!("{:.*}:{}", 4, Fixed(33).paint(&line_number), line);
-  }
+  println!("{:.*}:{}", 4, Fixed(33).paint(&number_of_newlines.to_string()), line);
 }
 
 pub fn stderr(message: &str) {
