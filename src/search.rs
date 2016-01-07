@@ -101,7 +101,7 @@ impl <'a> Search <'a> {
         if should_print_file && !printed_file {
           printed_file = true;
           let p = format!("{:?}", path.display());
-          println!("{}", Green.paint(&p));
+          println!("\n{}", Green.paint(&p));
         }
         output::print_matches(&buf, i, self.query_length);
       }
