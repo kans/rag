@@ -50,10 +50,6 @@ pub fn print_matches(text: &Vec<u8>, position: isize, pattern_length: isize) {
   println!("{:.*}:{:?}", 3, Fixed(33).paint(&number_string), s);
 }
 
-pub fn stderr(err: std::io::Error) {
-  writeln!(&mut io::stderr(), "ERR: {}", err.to_string()).unwrap();
-}
-
-pub fn stderr2(err: std::io::Error, message: &str) {
-  writeln!(&mut io::stderr(), "ERR: {} - {}", message, err.to_string()).unwrap();
+pub fn stderr(message: &str) {
+  writeln!(&mut io::stderr(), "ERR: {}.", message).unwrap();
 }

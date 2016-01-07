@@ -47,7 +47,7 @@ impl <'a> Search <'a> {
   pub fn search (&self, path: &Path, print_file: bool) {
     let metadata = match std::fs::metadata(path) {
       Err(oh_shit) => {
-        output::stderr(oh_shit);
+        output::stderr(&oh_shit.to_string());
         process::exit(0);
       },
       Ok(metadata) => metadata,
@@ -78,8 +78,8 @@ impl <'a> Search <'a> {
 
     let result = self.read_file(&string, &mut buf);
     if let Err(e) = result {
-      let message = format!("Can not read path {:?}", &string);
-      output::stderr2(e, &message);
+      let message = format!("Can not read path {:?} - {}", &string, &e.to_string());
+      output::stderr(&message);
       return;
     }
 
@@ -114,7 +114,7 @@ impl <'a> Search <'a> {
 
     let entries = match fs::read_dir(path) {
       Err(oh_shit) => {
-        output::stderr(oh_shit);
+        output::stderr(&oh_shit.to_string());
         return;
       },
       Ok(entries) => entries
@@ -123,7 +123,7 @@ impl <'a> Search <'a> {
     for entry in entries {
       let direntry = match entry {
         Err(oh_shit) => {
-          output::stderr(oh_shit);
+          output::stderr(&oh_shit.to_string());
           continue;
         },
         Ok(entry) => entry,
@@ -133,7 +133,7 @@ impl <'a> Search <'a> {
       let fucking_path : &Path = path_buf.as_path();
       let metadata = match std::fs::metadata(fucking_path) {
         Err(oh_shit) => {
-          output::stderr(oh_shit);
+          output::stderr(&oh_shit.to_string());
           continue;
         },
         Ok(metadata) => metadata,
