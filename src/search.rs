@@ -48,7 +48,7 @@ impl <'a> Search <'a> {
     let metadata = match std::fs::metadata(path) {
       Err(oh_shit) => {
         output::stderr(oh_shit);
-        return;
+        process::exit(0);
       },
       Ok(metadata) => metadata,
     };
@@ -76,7 +76,13 @@ impl <'a> Search <'a> {
       Some(s) => format!("{}", s),
     };
 
-    self.read_file(&string, &mut buf).ok().expect("could not read the file");
+    let result = self.read_file(&string, &mut buf);
+    if let Err(e) = result {
+      let message = format!("Can not read path {:?}", &string);
+      output::stderr2(e, &message);
+      return;
+    }
+
     let mut i: isize = 0;
     let mut j: isize;
     let mut printed_file = false;
@@ -85,6 +91,7 @@ impl <'a> Search <'a> {
     if utils::is_binary(&buf, buf_len) {
       return;
     }
+    // TODO: make unsafe!
     while i < buf_len as isize - self.query_length {
       j = self.query_length - 1;
       while j >= 0 && pattern[j as usize] == buf[(i+j) as usize] {
@@ -104,6 +111,7 @@ impl <'a> Search <'a> {
   }
 
  fn search_dir (&self, path: &Path) {
+
     let entries = match fs::read_dir(path) {
       Err(oh_shit) => {
         output::stderr(oh_shit);
