@@ -47,7 +47,7 @@ pub fn print_matches(text: &Vec<u8>, position: isize, pattern_length: isize) {
     index -= 1;
   }
   let number_string : String = number_of_newlines.to_string();
-  println!("{:.*}:{:?}", 3, Fixed(33).paint(&number_string), s);
+  println!("{:.*}:{}", 4, Fixed(33).paint(&number_string), s);
 }
 
 pub fn stderr(message: &str) {
